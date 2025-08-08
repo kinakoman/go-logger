@@ -1,4 +1,4 @@
-module github.com/kinakoman/go-logger
+module github.com/kinakoman/go-logger/logger
 
 go 1.22.1
 
