@@ -8,6 +8,3 @@ type Logger struct {
 	logger *zap.Logger
 }
 
-type NewLogger struct {
-	logger *zap.Logger
-}
