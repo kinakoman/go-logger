@@ -64,7 +64,7 @@ func NewLogger(paths ...string) (*Logger, error) {
 	core := zapcore.NewTee(cores...)
 
 	// caller情報を含める（1段上を呼び出し元として）
-	zapLogger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	zapLogger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
 	return &Logger{logger: zapLogger}, nil
 }
