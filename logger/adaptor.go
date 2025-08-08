@@ -10,4 +10,5 @@ type Logger struct {
 
 type NewLogger struct {
 	logger *zap.Logger
+	path string
 }
