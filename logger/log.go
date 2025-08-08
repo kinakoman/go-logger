@@ -37,7 +37,7 @@ func newSimpleEncoder() zapcore.Encoder {
 }
 
 // path: 相対パス（例: "logs/app.log"）
-func NewLogger(paths ...string) (*LoggerManager, error) {
+func NewLogger(paths ...string) (*Logger, error) {
 
 	encoder := newSimpleEncoder()
 
@@ -66,17 +66,17 @@ func NewLogger(paths ...string) (*LoggerManager, error) {
 	// caller情報を含める（1段上を呼び出し元として）
 	zapLogger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 
-	return &LoggerManager{logger: zapLogger}, nil
+	return &Logger{logger: zapLogger}, nil
 }
 
-func (l *LoggerManager) Info(msg string) {
+func (l *Logger) Info(msg string) {
 	l.logger.Info(msg)
 }
 
-func (l *LoggerManager) Error(msg string) {
+func (l *Logger) Error(msg string) {
 	l.logger.Error(msg)
 }
 
-func (l *LoggerManager) Warn(msg string) {
+func (l *Logger) Warn(msg string) {
 	l.logger.Warn(msg)
 }
