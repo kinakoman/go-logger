@@ -32,7 +32,7 @@ func Test_Logger(t *testing.T) {
 	loggerWithRoatation, err := NewLogger(LoggerConfig{
 		Filename:   "test_rotation.log",
 		MaxSize:    1, // MB単位で最大サイズ
-		MaxBackups: 3,
+		MaxBackups: 1,
 		MaxAge:     28,
 		Compress:   false, // 古いファイルの圧縮指定
 	})

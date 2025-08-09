@@ -71,6 +71,18 @@ func NewLogger(args ...interface{}) (*Logger, error) {
 func newLoggerWithLumberjack(config LoggerConfig) (*Logger, error) {
 	encoder := newSimpleEncoder()
 
+	if config.Filename == "" {
+		return nil, fmt.Errorf("filename must be specified in LoggerConfig")
+	}
+
+	if config.MaxSize <= 0 {
+		config.MaxSize = 1 // デフォルト値: 100MB
+	}
+
+	if config.MaxBackups <= 0 {
+		config.MaxBackups = 1 // デフォルト値: 無制限
+	}
+
 	// lumberjack ローテーション設定
 	rotator := &lumberjack.Logger{
 		Filename:   config.Filename,   // 例: "logs/app.log"
