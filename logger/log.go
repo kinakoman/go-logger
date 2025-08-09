@@ -8,6 +8,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // カスタムエンコーダ
@@ -36,8 +37,66 @@ func newSimpleEncoder() zapcore.Encoder {
 	})
 }
 
+func NewLogger(args ...interface{}) (*Logger, error) {
+	var s string
+	var config LoggerConfig
+	var hasS, hasConfig bool
+
+	for _, arg := range args {
+		switch v := arg.(type) {
+		case string:
+			s = v
+			hasS = true
+		case LoggerConfig:
+			config = v
+			hasConfig = true
+		default:
+			fmt.Printf("未知の型: %T\n", v)
+		}
+	}
+
+	switch {
+	case hasS:
+		return newLogger(s)
+	case !hasS && hasConfig:
+		return newLoggerWithLumberjack(config)
+	case hasS && hasConfig:
+		// configが指定されている場合は、configを使用してログファイルを設定
+		return newLoggerWithLumberjack(config)
+	}
+
+	return newLogger()
+}
+
+func newLoggerWithLumberjack(config LoggerConfig) (*Logger, error) {
+	encoder := newSimpleEncoder()
+
+	// lumberjack ローテーション設定
+	rotator := &lumberjack.Logger{
+		Filename:   config.Filename,   // 例: "logs/app.log"
+		MaxSize:    config.MaxSize,    // MB単位で最大サイズ
+		MaxBackups: config.MaxBackups, // 最大バックアップ数
+		MaxAge:     config.MaxAge,     // 最大保持日数
+		Compress:   config.Compress,   // 圧縮する場合
+	}
+
+	// コンソール出力
+	consoleSync := zapcore.Lock(os.Stdout)
+	consoleCore := zapcore.NewCore(encoder, consoleSync, zapcore.InfoLevel)
+
+	// ファイル出力（ローテーション付き）
+	fileSync := zapcore.AddSync(rotator)
+	fileCore := zapcore.NewCore(encoder, fileSync, zapcore.InfoLevel)
+
+	// Teeで両方に出力
+	core := zapcore.NewTee(consoleCore, fileCore)
+
+	zapLogger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(2))
+	return &Logger{logger: zapLogger}, nil
+}
+
 // path: 相対パス（例: "logs/app.log"）
-func NewLogger(paths ...string) (*Logger, error) {
+func newLogger(paths ...string) (*Logger, error) {
 
 	encoder := newSimpleEncoder()
 
